@@ -1,3 +1,5 @@
+import type { ReactNode } from 'react';
+
 export enum Gender {
   Male = 'Male',
   Female = 'Female',
@@ -70,5 +72,5 @@ export enum View {
 export type TableColumn<T> = {
   key: keyof T | 'actions';
   header: string;
-  render?: (item: T) => any;
+  render?: (item: T) => ReactNode;
 };
