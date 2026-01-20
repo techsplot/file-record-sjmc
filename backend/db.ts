@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { PersonalFile, FamilyFile, ReferralFile, EmergencyFile, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile } from '../types';
+import { PersonalFile, FamilyFile, ReferralFile, EmergencyFile, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile } from '../types.js';
 // FIX: Changed date-fns import to use a named import for `addYears` to resolve "not callable" error.
 import { addYears } from 'date-fns';
 
