@@ -1,6 +1,6 @@
 // FIX: Changed Express import to use ES module syntax.
 import express from 'express';
-import { db } from './db.ts';
+import { db } from './db.js';
 import jwt from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
@@ -25,7 +25,7 @@ const authenticateToken = (req: express.Request, res: express.Response, next: ex
         return res.status(403).json({ message: 'Invalid or expired token' });
     }
 };
-import { Gender, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile } from '../types';
+import { Gender, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile } from '../types.js';
 
 const router = express.Router();
 

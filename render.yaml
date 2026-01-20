@@ -1,0 +1,56 @@
+services:
+  # Backend API
+  - type: web
+    name: sjmc-backend
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sjmc-db
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: sjmc-db
+          property: host
+      - key: DB_USER
+        fromDatabase:
+          name: sjmc-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: sjmc-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: sjmc-db
+          property: database
+      - key: DB_PORT
+        fromDatabase:
+          name: sjmc-db
+          property: port
+
+  # Frontend
+  - type: web
+    name: sjmc-frontend
+    env: static
+    region: oregon
+    plan: free
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://sjmc-backend.onrender.com
+
+databases:
+  - name: sjmc-db
+    databaseName: sjmc
+    plan: free
+    region: oregon
