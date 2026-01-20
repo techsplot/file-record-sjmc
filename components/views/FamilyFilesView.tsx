@@ -3,8 +3,7 @@ import { FamilyFile, FileStatus, TableColumn, NewFamilyFile } from '../../types'
 import FileTable from '../FileTable';
 import FamilyFileModal from '../modals/FamilyFileModal';
 import { SearchIcon, PlusIcon } from '../icons';
-import { format, isBefore } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
+import { format, isBefore, parseISO } from 'date-fns';
 import { API_BASE_URL } from '../../config';
 
 const FamilyFilesView: React.FC = () => {

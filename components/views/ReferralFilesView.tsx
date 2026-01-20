@@ -3,8 +3,7 @@ import { ReferralFile, FileStatus, TableColumn, NewReferralFile } from '../../ty
 import FileTable from '../FileTable';
 import ReferralFileModal from '../modals/ReferralFileModal';
 import { SearchIcon, PlusIcon } from '../icons';
-import { format, isBefore } from 'date-fns';
-import parseISO from 'date-fns/parseISO';
+import { format, isBefore, parseISO } from 'date-fns';
 import { API_BASE_URL } from '../../config';
 
 const ReferralFilesView: React.FC = () => {

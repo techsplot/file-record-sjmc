@@ -70,5 +70,5 @@ export enum View {
 export type TableColumn<T> = {
   key: keyof T | 'actions';
   header: string;
-  render?: (item: T) => React.ReactNode;
+  render?: (item: T) => any;
 };
