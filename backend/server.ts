@@ -5,6 +5,8 @@ import dotenv from 'dotenv';
 // FIX: Using a named import for the router to ensure module compatibility.
 import { router as apiRouter } from './api.js';
 import path from 'path';
+import swaggerUi from 'swagger-ui-express';
+import { swaggerSpec } from './swagger.js';
 
 dotenv.config();
 
@@ -13,6 +15,49 @@ const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(express.json());
+
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Health check endpoint
+ *     description: Returns the status of the API server
+ *     tags: [Health]
+ *     responses:
+ *       200:
+ *         description: Server is running
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: ok
+ *                 message:
+ *                   type: string
+ *                   example: SJMC backend is running
+ *                 timestamp:
+ *                   type: string
+ *                   example: 2024-01-01T00:00:00.000Z
+ *                 uptime:
+ *                   type: number
+ *                   example: 123.456
+ */
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'SJMC backend is running',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
+
+// Swagger UI documentation
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
+  customCss: '.swagger-ui .topbar { display: none }',
+  customSiteTitle: 'SJMC API Documentation'
+}));
 
 // API routes
 app.use('/api', apiRouter);

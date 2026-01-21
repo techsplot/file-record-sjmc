@@ -184,3 +184,137 @@ Make sure to set these environment variables in your hosting platform:
 
 **Frontend:**
 - `VITE_API_URL` - Your backend API URL (e.g., https://sjmc-backend.onrender.com)
+
+---
+
+## API Documentation
+
+The SJMC backend provides a comprehensive RESTful API with interactive documentation via Swagger UI.
+
+### Accessing the API Documentation
+
+Once the backend is running, you can access the interactive API documentation at:
+
+- **Local Development**: `http://localhost:3001/api-docs`
+- **Production**: `https://your-backend-url.com/api-docs`
+
+The Swagger UI provides:
+- Complete list of all API endpoints
+- Request/response schemas
+- Try-it-out functionality to test endpoints directly
+- Authentication handling for protected endpoints
+
+### Health Check Endpoint
+
+To quickly verify that your backend is running, use the health check endpoint:
+
+**Endpoint**: `GET /health`
+
+**Example Request**:
+```bash
+curl http://localhost:3001/health
+```
+
+**Example Response**:
+```json
+{
+  "status": "ok",
+  "message": "SJMC backend is running",
+  "timestamp": "2024-01-01T00:00:00.000Z",
+  "uptime": 123.456
+}
+```
+
+This endpoint is publicly accessible (no authentication required) and is perfect for:
+- Verifying deployment status
+- Health monitoring
+- Load balancer health checks
+
+### API Authentication
+
+Most API endpoints require JWT authentication. Here's how to access protected endpoints:
+
+#### Step 1: Login to Get JWT Token
+
+**Endpoint**: `POST /api/login`
+
+**Request Body**:
+```json
+{
+  "email": "admin@sjmc.com",
+  "password": "password123"
+}
+```
+
+**Example using curl**:
+```bash
+curl -X POST http://localhost:3001/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@sjmc.com","password":"password123"}'
+```
+
+**Response**:
+```json
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "email": "admin@sjmc.com"
+  }
+}
+```
+
+#### Step 2: Use the Token for Protected Endpoints
+
+Include the JWT token in the `Authorization` header with the format `Bearer <token>`:
+
+**Example**:
+```bash
+curl http://localhost:3001/api/stats \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+```
+
+### Quick API Reference
+
+#### Authentication Endpoints
+- `POST /api/login` - Login and get JWT token
+- `GET /api/verify-token` - Verify if a token is valid (requires auth)
+
+#### Statistics
+- `GET /api/stats` - Get statistics for all file types (requires auth)
+
+#### Personal Files
+- `GET /api/personal` - Get all personal files
+- `POST /api/personal` - Create a new personal file
+- `PUT /api/personal/:id` - Update a personal file
+- `DELETE /api/personal/:id` - Delete a personal file
+
+#### Family Files
+- `GET /api/family` - Get all family files
+- `POST /api/family` - Create a new family file
+- `PUT /api/family/:id` - Update a family file
+- `DELETE /api/family/:id` - Delete a family file
+
+#### Referral Files
+- `GET /api/referral` - Get all referral files
+- `POST /api/referral` - Create a new referral file
+- `PUT /api/referral/:id` - Update a referral file
+- `DELETE /api/referral/:id` - Delete a referral file
+
+#### Emergency Files
+- `GET /api/emergency` - Get all emergency files
+- `POST /api/emergency` - Create a new emergency file
+- `PUT /api/emergency/:id` - Update an emergency file
+- `DELETE /api/emergency/:id` - Delete an emergency file
+
+### Testing the API
+
+You can test the API in several ways:
+
+1. **Swagger UI** (Recommended): Visit `/api-docs` for interactive testing
+2. **curl**: Use command-line curl commands (examples above)
+3. **Postman**: Import endpoints from Swagger JSON at `/api-docs/swagger.json`
+4. **Frontend Application**: The React frontend provides a complete UI for all operations
+
+For detailed request/response schemas and to try out the API endpoints interactively, please visit the Swagger UI documentation at `/api-docs`.
