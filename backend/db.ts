@@ -90,8 +90,43 @@ const toPostgreSQLTimestamp = (date: Date) => date.toISOString();
 
 const createId = (prefix = 'SJMC') => `${prefix}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+// PostgreSQL row interfaces (lowercase column names)
+interface PersonalFileRow {
+    id: string;
+    name: string;
+    age: number;
+    gender: string;
+    registrationdate: string;
+    expirydate: string;
+}
+
+interface FamilyFileRow {
+    id: string;
+    headname: string;
+    membercount: number;
+    registrationdate: string;
+    expirydate: string;
+}
+
+interface ReferralFileRow {
+    id: string;
+    referralname: string;
+    patientcount: number;
+    registrationdate: string;
+    expirydate: string;
+}
+
+interface EmergencyFileRow {
+    id: string;
+    name: string;
+    age: number;
+    gender: string;
+    registrationdate: string;
+    expirydate: string;
+}
+
 // Helper function to convert PostgreSQL row to camelCase
-const mapPersonalFile = (row: any): PersonalFile => ({
+const mapPersonalFile = (row: PersonalFileRow): PersonalFile => ({
     id: row.id,
     name: row.name,
     age: row.age,
@@ -100,7 +135,7 @@ const mapPersonalFile = (row: any): PersonalFile => ({
     expiryDate: row.expirydate
 });
 
-const mapFamilyFile = (row: any): FamilyFile => ({
+const mapFamilyFile = (row: FamilyFileRow): FamilyFile => ({
     id: row.id,
     headName: row.headname,
     memberCount: row.membercount,
@@ -108,7 +143,7 @@ const mapFamilyFile = (row: any): FamilyFile => ({
     expiryDate: row.expirydate
 });
 
-const mapReferralFile = (row: any): ReferralFile => ({
+const mapReferralFile = (row: ReferralFileRow): ReferralFile => ({
     id: row.id,
     referralName: row.referralname,
     patientCount: row.patientcount,
@@ -116,7 +151,7 @@ const mapReferralFile = (row: any): ReferralFile => ({
     expiryDate: row.expirydate
 });
 
-const mapEmergencyFile = (row: any): EmergencyFile => ({
+const mapEmergencyFile = (row: EmergencyFileRow): EmergencyFile => ({
     id: row.id,
     name: row.name,
     age: row.age,
