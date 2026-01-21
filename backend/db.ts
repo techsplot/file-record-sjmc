@@ -90,12 +90,47 @@ const toPostgreSQLTimestamp = (date: Date) => date.toISOString();
 
 const createId = (prefix = 'SJMC') => `${prefix}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
 
+// Helper function to convert PostgreSQL row to camelCase
+const mapPersonalFile = (row: any): PersonalFile => ({
+    id: row.id,
+    name: row.name,
+    age: row.age,
+    gender: row.gender,
+    registrationDate: row.registrationdate,
+    expiryDate: row.expirydate
+});
+
+const mapFamilyFile = (row: any): FamilyFile => ({
+    id: row.id,
+    headName: row.headname,
+    memberCount: row.membercount,
+    registrationDate: row.registrationdate,
+    expiryDate: row.expirydate
+});
+
+const mapReferralFile = (row: any): ReferralFile => ({
+    id: row.id,
+    referralName: row.referralname,
+    patientCount: row.patientcount,
+    registrationDate: row.registrationdate,
+    expiryDate: row.expirydate
+});
+
+const mapEmergencyFile = (row: any): EmergencyFile => ({
+    id: row.id,
+    name: row.name,
+    age: row.age,
+    gender: row.gender,
+    registrationDate: row.registrationdate,
+    expiryDate: row.expirydate
+});
+
 // Real DB Operations using PostgreSQL
 export const db = {
     personal: {
         find: async (): Promise<PersonalFile[]> => {
             const result = await getPool().query('SELECT * FROM personal_files ORDER BY registrationDate DESC');
-            return result.rows as PersonalFile[];
+            return result.rows.map(mapPersonalFile);
         },
         create: async (data: NewPersonalFile): Promise<PersonalFile> => {
             const newFile: PersonalFile = {
@@ -133,7 +168,7 @@ export const db = {
             if (result.rowCount === 0) return null;
             
             const updatedResult = await getPool().query('SELECT * FROM personal_files WHERE id = $1', [id]);
-            const updatedFile = updatedResult.rows[0] || null;
+            const updatedFile = updatedResult.rows[0] ? mapPersonalFile(updatedResult.rows[0]) : null;
             console.log('Updated file:', updatedFile);
             return updatedFile;
         },
@@ -146,7 +181,7 @@ export const db = {
     family: {
         find: async (): Promise<FamilyFile[]> => {
             const result = await getPool().query('SELECT * FROM family_files ORDER BY registrationDate DESC');
-            return result.rows as FamilyFile[];
+            return result.rows.map(mapFamilyFile);
         },
         create: async (data: NewFamilyFile): Promise<FamilyFile> => {
             const newFile: FamilyFile = {
@@ -180,7 +215,7 @@ export const db = {
             if (result.rowCount === 0) return null;
             
             const updatedResult = await getPool().query('SELECT * FROM family_files WHERE id = $1', [id]);
-            return updatedResult.rows[0] || null;
+            return updatedResult.rows[0] ? mapFamilyFile(updatedResult.rows[0]) : null;
         },
         delete: async (id: string): Promise<{ success: boolean }> => {
             const result = await getPool().query('DELETE FROM family_files WHERE id = $1', [id]);
@@ -190,7 +225,7 @@ export const db = {
     referral: {
         find: async (): Promise<ReferralFile[]> => {
             const result = await getPool().query('SELECT * FROM referral_files ORDER BY registrationDate DESC');
-            return result.rows as ReferralFile[];
+            return result.rows.map(mapReferralFile);
         },
          create: async (data: NewReferralFile): Promise<ReferralFile> => {
             const newFile: ReferralFile = {
@@ -224,7 +259,7 @@ export const db = {
             if (result.rowCount === 0) return null;
             
             const updatedResult = await getPool().query('SELECT * FROM referral_files WHERE id = $1', [id]);
-            return updatedResult.rows[0] || null;
+            return updatedResult.rows[0] ? mapReferralFile(updatedResult.rows[0]) : null;
         },
         delete: async (id: string): Promise<{ success: boolean }> => {
             const result = await getPool().query('DELETE FROM referral_files WHERE id = $1', [id]);
@@ -234,7 +269,7 @@ export const db = {
     emergency: {
         find: async (): Promise<EmergencyFile[]> => {
             const result = await getPool().query('SELECT * FROM emergency_files ORDER BY registrationDate DESC');
-            return result.rows as EmergencyFile[];
+            return result.rows.map(mapEmergencyFile);
         },
         create: async (data: NewEmergencyFile): Promise<EmergencyFile> => {
             const newFile: EmergencyFile = {
@@ -252,7 +287,7 @@ export const db = {
             const result = await getPool().query(sql, [data.name, data.age, data.gender, id]);
             if (result.rowCount === 0) return null;
             const updatedResult = await getPool().query('SELECT * FROM emergency_files WHERE id = $1', [id]);
-            return updatedResult.rows[0] || null;
+            return updatedResult.rows[0] ? mapEmergencyFile(updatedResult.rows[0]) : null;
         },
         delete: async (id: string): Promise<{ success: boolean }> => {
             const result = await getPool().query('DELETE FROM emergency_files WHERE id = $1', [id]);
