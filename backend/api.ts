@@ -2,6 +2,7 @@
 import express from 'express';
 import { db } from './db.js';
 import jwt from 'jsonwebtoken';
+import { cache } from './cache.js';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
@@ -133,7 +134,21 @@ router.get('/verify-token', authenticateToken, (req, res) => {
  */
 router.get('/stats', authenticateToken, async (req, res) => {
     try {
+        // Check cache first
+        const cacheKey = 'stats';
+        const cachedStats = cache.get(cacheKey);
+        
+        if (cachedStats) {
+            console.log('Returning cached stats');
+            return res.json(cachedStats);
+        }
+        
+        // If not in cache, fetch from database
         const stats = await db.getStats();
+        
+        // Cache for 2 minutes (stats change frequently)
+        cache.set(cacheKey, stats, 2 * 60 * 1000);
+        
         res.json(stats);
     } catch (error) {
         console.error("Error fetching stats:", error);
@@ -163,7 +178,21 @@ router.get('/stats', authenticateToken, async (req, res) => {
  */
 router.get('/personal', async (req, res) => {
     try {
+        // Check cache first
+        const cacheKey = 'personal:all';
+        const cachedFiles = cache.get(cacheKey);
+        
+        if (cachedFiles) {
+            console.log('Returning cached personal files');
+            return res.json(cachedFiles);
+        }
+        
+        // If not in cache, fetch from database
         const files = await db.personal.find();
+        
+        // Cache for 5 minutes
+        cache.set(cacheKey, files, 5 * 60 * 1000);
+        
         res.json(files);
     } catch (error) {
         console.error("Error fetching personal files:", error);
@@ -225,6 +254,11 @@ router.post('/personal', async (req, res) => {
             registrationDate,
             expiryDate
         });
+        
+        // Invalidate cache after creating a new file
+        cache.invalidatePattern('personal');
+        cache.invalidate('stats');
+        
         res.status(201).json(newFile);
     } catch (error) {
         console.error("Error creating personal file:", error);
@@ -300,6 +334,11 @@ router.put('/personal/:id', async (req, res) => {
         });
 
         if (!updatedFile) return res.status(404).json({ message: 'File not found' });
+        
+        // Invalidate cache after updating a file
+        cache.invalidatePattern('personal');
+        cache.invalidate('stats');
+        
         console.log('File updated successfully:', updatedFile);
         res.json(updatedFile);
     } catch (error) {
@@ -331,6 +370,11 @@ router.put('/personal/:id', async (req, res) => {
 router.delete('/personal/:id', async (req, res) => {
     try {
         await db.personal.delete(req.params.id);
+        
+        // Invalidate cache after deleting a file
+        cache.invalidatePattern('personal');
+        cache.invalidate('stats');
+        
         res.status(204).send();
     } catch (error) {
         console.error(`Error deleting personal file ${req.params.id}:`, error);
@@ -361,7 +405,21 @@ router.delete('/personal/:id', async (req, res) => {
  */
 router.get('/family', async (req, res) => {
     try {
+        // Check cache first
+        const cacheKey = 'family:all';
+        const cachedFiles = cache.get(cacheKey);
+        
+        if (cachedFiles) {
+            console.log('Returning cached family files');
+            return res.json(cachedFiles);
+        }
+        
+        // If not in cache, fetch from database
         const files = await db.family.find();
+        
+        // Cache for 5 minutes
+        cache.set(cacheKey, files, 5 * 60 * 1000);
+        
         res.json(files);
     } catch (error) {
         console.error("Error fetching family files:", error);
@@ -418,6 +476,11 @@ router.post('/family', async (req, res) => {
             registrationDate,
             expiryDate
         });
+        
+        // Invalidate cache
+        cache.invalidatePattern('family');
+        cache.invalidate('stats');
+        
         res.status(201).json(newFile);
     } catch (error) {
         console.error("Error creating family file:", error);
@@ -457,6 +520,11 @@ router.put('/family/:id', async (req, res) => {
     try {
         const updatedFile = await db.family.update(req.params.id, req.body);
         if (!updatedFile) return res.status(404).json({ message: 'File not found' });
+        
+        // Invalidate cache
+        cache.invalidatePattern('family');
+        cache.invalidate('stats');
+        
         res.json(updatedFile);
     } catch (error) {
         console.error(`Error updating family file ${req.params.id}:`, error);
@@ -487,6 +555,11 @@ router.put('/family/:id', async (req, res) => {
 router.delete('/family/:id', async (req, res) => {
     try {
         await db.family.delete(req.params.id);
+        
+        // Invalidate cache
+        cache.invalidatePattern('family');
+        cache.invalidate('stats');
+        
         res.status(204).send();
     } catch (error) {
         console.error(`Error deleting family file ${req.params.id}:`, error);
@@ -516,7 +589,21 @@ router.delete('/family/:id', async (req, res) => {
  */
 router.get('/referral', async (req, res) => {
     try {
+        // Check cache first
+        const cacheKey = 'referral:all';
+        const cachedFiles = cache.get(cacheKey);
+        
+        if (cachedFiles) {
+            console.log('Returning cached referral files');
+            return res.json(cachedFiles);
+        }
+        
+        // If not in cache, fetch from database
         const files = await db.referral.find();
+        
+        // Cache for 5 minutes
+        cache.set(cacheKey, files, 5 * 60 * 1000);
+        
         res.json(files);
     } catch (error) {
         console.error("Error fetching referral files:", error);
@@ -573,6 +660,11 @@ router.post('/referral', async (req, res) => {
             registrationDate,
             expiryDate
         });
+        
+        // Invalidate cache
+        cache.invalidatePattern('referral');
+        cache.invalidate('stats');
+        
         res.status(201).json(newFile);
     } catch (error) {
         console.error("Error creating referral file:", error);
@@ -612,6 +704,11 @@ router.put('/referral/:id', async (req, res) => {
     try {
         const updatedFile = await db.referral.update(req.params.id, req.body);
         if (!updatedFile) return res.status(404).json({ message: 'File not found' });
+        
+        // Invalidate cache
+        cache.invalidatePattern('referral');
+        cache.invalidate('stats');
+        
         res.json(updatedFile);
     } catch (error) {
         console.error(`Error updating referral file ${req.params.id}:`, error);
@@ -642,6 +739,11 @@ router.put('/referral/:id', async (req, res) => {
 router.delete('/referral/:id', async (req, res) => {
     try {
         await db.referral.delete(req.params.id);
+        
+        // Invalidate cache
+        cache.invalidatePattern('referral');
+        cache.invalidate('stats');
+        
         res.status(204).send();
     } catch (error) {
         console.error(`Error deleting referral file ${req.params.id}:`, error);
@@ -671,7 +773,21 @@ router.delete('/referral/:id', async (req, res) => {
  */
 router.get('/emergency', async (req, res) => {
     try {
+        // Check cache first
+        const cacheKey = 'emergency:all';
+        const cachedFiles = cache.get(cacheKey);
+        
+        if (cachedFiles) {
+            console.log('Returning cached emergency files');
+            return res.json(cachedFiles);
+        }
+        
+        // If not in cache, fetch from database
         const files = await db.emergency.find();
+        
+        // Cache for 5 minutes
+        cache.set(cacheKey, files, 5 * 60 * 1000);
+        
         res.json(files);
     } catch (error) {
         console.error("Error fetching emergency files:", error);
@@ -733,6 +849,11 @@ router.post('/emergency', async (req, res) => {
             registrationDate,
             expiryDate
         });
+        
+        // Invalidate cache
+        cache.invalidatePattern('emergency');
+        cache.invalidate('stats');
+        
         res.status(201).json(newFile);
     } catch (error) {
         console.error("Error creating emergency file:", error);
@@ -772,6 +893,11 @@ router.put('/emergency/:id', async (req, res) => {
     try {
         const updatedFile = await db.emergency.update(req.params.id, req.body);
         if (!updatedFile) return res.status(404).json({ message: 'File not found' });
+        
+        // Invalidate cache
+        cache.invalidatePattern('emergency');
+        cache.invalidate('stats');
+        
         res.json(updatedFile);
     } catch (error) {
         console.error(`Error updating emergency file ${req.params.id}:`, error);
@@ -802,6 +928,11 @@ router.put('/emergency/:id', async (req, res) => {
 router.delete('/emergency/:id', async (req, res) => {
     try {
         await db.emergency.delete(req.params.id);
+        
+        // Invalidate cache
+        cache.invalidatePattern('emergency');
+        cache.invalidate('stats');
+        
         res.status(204).send();
     } catch (error) {
         console.error(`Error deleting emergency file ${req.params.id}:`, error);
