@@ -33,8 +33,11 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         setError(data.message || 'Invalid credentials. Please try again.');
       }
     } catch (err) {
-      console.error('Login error:', err);
-      console.error('Attempted to connect to:', `${API_BASE_URL}/api/login`);
+      // Only log detailed debug info in development to avoid exposing sensitive info in production
+      if (import.meta.env.DEV) {
+        console.error('Login error:', err);
+        console.error('Attempted to connect to:', `${API_BASE_URL}/api/login`);
+      }
       setError(
         'Failed to connect to the server. Please check your internet connection and try again. ' +
         'If the problem persists, the backend server may be down or unreachable.'

@@ -1,8 +1,11 @@
 // Get the API URL from environment variable or use localhost as fallback
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// Log the API URL to help with debugging (only shows in browser console)
-console.log('API Base URL:', API_BASE_URL);
+// Always log the API URL in development, and in production only if it seems misconfigured
+// This helps users debug connection issues during deployment
+if (import.meta.env.DEV || API_BASE_URL.includes('localhost')) {
+  console.log('API Base URL:', API_BASE_URL);
+}
 
 // Warn if using localhost in production build
 if (import.meta.env.PROD && API_BASE_URL.includes('localhost')) {
