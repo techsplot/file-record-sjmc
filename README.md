@@ -139,6 +139,10 @@ Use the following credentials to log in to the application:
 
 ## Deployment
 
+> **📖 Important Resources:**
+> - **Step-by-step deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md)
+> - **Common issues & fixes**: See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
 This application can be deployed for free on several platforms:
 
 ### Deploy on Render (Recommended)
