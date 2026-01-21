@@ -30,6 +30,40 @@ import { Gender, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFi
 const router = express.Router();
 
 // --- AUTH ---
+/**
+ * @swagger
+ * /api/login:
+ *   post:
+ *     summary: Login to the system
+ *     description: Authenticate with email and password to get a JWT token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/LoginRequest'
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/LoginResponse'
+ *       401:
+ *         description: Invalid credentials
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: Invalid credentials
+ */
 router.post('/login', (req, res) => {
     const { email, password } = req.body;
     // Hardcoded admin credentials as requested
@@ -47,11 +81,56 @@ router.post('/login', (req, res) => {
 });
 
 // Verify token endpoint
+/**
+ * @swagger
+ * /api/verify-token:
+ *   get:
+ *     summary: Verify JWT token
+ *     description: Verify if the provided JWT token is valid
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Token is valid
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *       401:
+ *         description: Authentication token required
+ *       403:
+ *         description: Invalid or expired token
+ */
 router.get('/verify-token', authenticateToken, (req, res) => {
     res.json({ user: req.user });
 });
 
 // --- STATS ---
+/**
+ * @swagger
+ * /api/stats:
+ *   get:
+ *     summary: Get statistics
+ *     description: Get statistics for all file types
+ *     tags: [Statistics]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Statistics retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Stats'
+ *       401:
+ *         description: Authentication token required
+ *       500:
+ *         description: Error fetching stats
+ */
 router.get('/stats', authenticateToken, async (req, res) => {
     try {
         const stats = await db.getStats();
@@ -63,6 +142,25 @@ router.get('/stats', authenticateToken, async (req, res) => {
 });
 
 // --- PERSONAL FILES (CRUD) ---
+/**
+ * @swagger
+ * /api/personal:
+ *   get:
+ *     summary: Get all personal files
+ *     description: Retrieve all personal files from the database
+ *     tags: [Personal Files]
+ *     responses:
+ *       200:
+ *         description: List of personal files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PersonalFile'
+ *       500:
+ *         description: Error fetching files
+ */
 router.get('/personal', async (req, res) => {
     try {
         const files = await db.personal.find();
@@ -73,6 +171,43 @@ router.get('/personal', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/personal:
+ *   post:
+ *     summary: Create a new personal file
+ *     description: Create a new personal file record
+ *     tags: [Personal Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, age, gender]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: John Doe
+ *               age:
+ *                 type: number
+ *                 example: 30
+ *               gender:
+ *                 type: string
+ *                 enum: [Male, Female, Other]
+ *                 example: Male
+ *     responses:
+ *       201:
+ *         description: Personal file created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PersonalFile'
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Error creating file
+ */
 router.post('/personal', async (req, res) => {
     try {
         const { name, age, gender } = req.body;
@@ -97,6 +232,55 @@ router.post('/personal', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/personal/{id}:
+ *   put:
+ *     summary: Update a personal file
+ *     description: Update an existing personal file record
+ *     tags: [Personal Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Personal file ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, age, gender]
+ *             properties:
+ *               name:
+ *                 type: string
+ *               age:
+ *                 type: number
+ *               gender:
+ *                 type: string
+ *                 enum: [Male, Female, Other]
+ *               registrationDate:
+ *                 type: string
+ *                 format: date
+ *               expiryDate:
+ *                 type: string
+ *                 format: date
+ *     responses:
+ *       200:
+ *         description: Personal file updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/PersonalFile'
+ *       400:
+ *         description: Missing required fields
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error updating file
+ */
 router.put('/personal/:id', async (req, res) => {
     try {
         console.log('Updating personal file:', req.params.id, 'with data:', req.body);
@@ -124,6 +308,26 @@ router.put('/personal/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/personal/{id}:
+ *   delete:
+ *     summary: Delete a personal file
+ *     description: Delete a personal file record
+ *     tags: [Personal Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Personal file ID
+ *     responses:
+ *       204:
+ *         description: Personal file deleted successfully
+ *       500:
+ *         description: Error deleting file
+ */
 router.delete('/personal/:id', async (req, res) => {
     try {
         await db.personal.delete(req.params.id);
@@ -136,6 +340,25 @@ router.delete('/personal/:id', async (req, res) => {
 
 
 // --- FAMILY FILES (CRUD) ---
+/**
+ * @swagger
+ * /api/family:
+ *   get:
+ *     summary: Get all family files
+ *     description: Retrieve all family files from the database
+ *     tags: [Family Files]
+ *     responses:
+ *       200:
+ *         description: List of family files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/FamilyFile'
+ *       500:
+ *         description: Error fetching files
+ */
 router.get('/family', async (req, res) => {
     try {
         const files = await db.family.find();
@@ -146,6 +369,39 @@ router.get('/family', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/family:
+ *   post:
+ *     summary: Create a new family file
+ *     description: Create a new family file record
+ *     tags: [Family Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [headName, memberCount]
+ *             properties:
+ *               headName:
+ *                 type: string
+ *                 example: Jane Smith
+ *               memberCount:
+ *                 type: number
+ *                 example: 4
+ *     responses:
+ *       201:
+ *         description: Family file created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/FamilyFile'
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Error creating file
+ */
 router.post('/family', async (req, res) => {
     try {
         const { headName, memberCount } = req.body;
@@ -169,6 +425,34 @@ router.post('/family', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/family/{id}:
+ *   put:
+ *     summary: Update a family file
+ *     description: Update an existing family file record
+ *     tags: [Family Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Family file ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/FamilyFile'
+ *     responses:
+ *       200:
+ *         description: Family file updated successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error updating file
+ */
 router.put('/family/:id', async (req, res) => {
     try {
         const updatedFile = await db.family.update(req.params.id, req.body);
@@ -180,6 +464,26 @@ router.put('/family/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/family/{id}:
+ *   delete:
+ *     summary: Delete a family file
+ *     description: Delete a family file record
+ *     tags: [Family Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Family file ID
+ *     responses:
+ *       204:
+ *         description: Family file deleted successfully
+ *       500:
+ *         description: Error deleting file
+ */
 router.delete('/family/:id', async (req, res) => {
     try {
         await db.family.delete(req.params.id);
@@ -191,6 +495,25 @@ router.delete('/family/:id', async (req, res) => {
 });
 
 // --- REFERRAL FILES (CRUD) ---
+/**
+ * @swagger
+ * /api/referral:
+ *   get:
+ *     summary: Get all referral files
+ *     description: Retrieve all referral files from the database
+ *     tags: [Referral Files]
+ *     responses:
+ *       200:
+ *         description: List of referral files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ReferralFile'
+ *       500:
+ *         description: Error fetching files
+ */
 router.get('/referral', async (req, res) => {
     try {
         const files = await db.referral.find();
@@ -201,6 +524,39 @@ router.get('/referral', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/referral:
+ *   post:
+ *     summary: Create a new referral file
+ *     description: Create a new referral file record
+ *     tags: [Referral Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [referralName, patientCount]
+ *             properties:
+ *               referralName:
+ *                 type: string
+ *                 example: Dr. Johnson
+ *               patientCount:
+ *                 type: number
+ *                 example: 10
+ *     responses:
+ *       201:
+ *         description: Referral file created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ReferralFile'
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Error creating file
+ */
 router.post('/referral', async (req, res) => {
     try {
         const { referralName, patientCount } = req.body;
@@ -224,6 +580,34 @@ router.post('/referral', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/referral/{id}:
+ *   put:
+ *     summary: Update a referral file
+ *     description: Update an existing referral file record
+ *     tags: [Referral Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Referral file ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ReferralFile'
+ *     responses:
+ *       200:
+ *         description: Referral file updated successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error updating file
+ */
 router.put('/referral/:id', async (req, res) => {
     try {
         const updatedFile = await db.referral.update(req.params.id, req.body);
@@ -235,6 +619,26 @@ router.put('/referral/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/referral/{id}:
+ *   delete:
+ *     summary: Delete a referral file
+ *     description: Delete a referral file record
+ *     tags: [Referral Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Referral file ID
+ *     responses:
+ *       204:
+ *         description: Referral file deleted successfully
+ *       500:
+ *         description: Error deleting file
+ */
 router.delete('/referral/:id', async (req, res) => {
     try {
         await db.referral.delete(req.params.id);
@@ -246,6 +650,25 @@ router.delete('/referral/:id', async (req, res) => {
 });
 
 // --- EMERGENCY FILES (CRUD) ---
+/**
+ * @swagger
+ * /api/emergency:
+ *   get:
+ *     summary: Get all emergency files
+ *     description: Retrieve all emergency files from the database
+ *     tags: [Emergency Files]
+ *     responses:
+ *       200:
+ *         description: List of emergency files
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/EmergencyFile'
+ *       500:
+ *         description: Error fetching files
+ */
 router.get('/emergency', async (req, res) => {
     try {
         const files = await db.emergency.find();
@@ -256,6 +679,43 @@ router.get('/emergency', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/emergency:
+ *   post:
+ *     summary: Create a new emergency file
+ *     description: Create a new emergency file record
+ *     tags: [Emergency Files]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, age, gender]
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 example: Emergency Patient
+ *               age:
+ *                 type: number
+ *                 example: 45
+ *               gender:
+ *                 type: string
+ *                 enum: [Male, Female, Other]
+ *                 example: Female
+ *     responses:
+ *       201:
+ *         description: Emergency file created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/EmergencyFile'
+ *       400:
+ *         description: Missing required fields
+ *       500:
+ *         description: Error creating file
+ */
 router.post('/emergency', async (req, res) => {
     try {
         const { name, age, gender } = req.body;
@@ -280,6 +740,34 @@ router.post('/emergency', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/emergency/{id}:
+ *   put:
+ *     summary: Update an emergency file
+ *     description: Update an existing emergency file record
+ *     tags: [Emergency Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Emergency file ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/EmergencyFile'
+ *     responses:
+ *       200:
+ *         description: Emergency file updated successfully
+ *       404:
+ *         description: File not found
+ *       500:
+ *         description: Error updating file
+ */
 router.put('/emergency/:id', async (req, res) => {
     try {
         const updatedFile = await db.emergency.update(req.params.id, req.body);
@@ -291,6 +779,26 @@ router.put('/emergency/:id', async (req, res) => {
     }
 });
 
+/**
+ * @swagger
+ * /api/emergency/{id}:
+ *   delete:
+ *     summary: Delete an emergency file
+ *     description: Delete an emergency file record
+ *     tags: [Emergency Files]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Emergency file ID
+ *     responses:
+ *       204:
+ *         description: Emergency file deleted successfully
+ *       500:
+ *         description: Error deleting file
+ */
 router.delete('/emergency/:id', async (req, res) => {
     try {
         await db.emergency.delete(req.params.id);
