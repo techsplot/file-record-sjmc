@@ -139,6 +139,10 @@ Use the following credentials to log in to the application:
 
 ## Deployment
 
+> **📖 Important Resources:**
+> - **Step-by-step deployment guide**: See [DEPLOYMENT.md](./DEPLOYMENT.md)
+> - **Common issues & fixes**: See [TROUBLESHOOTING.md](./TROUBLESHOOTING.md)
+
 This application can be deployed for free on several platforms:
 
 ### Deploy on Render (Recommended)
@@ -161,13 +165,20 @@ This application can be deployed for free on several platforms:
 
 ### Deploy Frontend on Vercel + Backend on Render/Railway
 
+> **⚠️ IMPORTANT**: For detailed step-by-step deployment instructions with troubleshooting, see [DEPLOYMENT.md](./DEPLOYMENT.md)
+
+**Quick Overview:**
+
 **Frontend (Vercel):**
 1. Sign up at [vercel.com](https://vercel.com)
 2. Import your GitHub repository
-3. Vercel will auto-detect Vite configuration
-4. Add environment variable: `VITE_API_URL` = your backend URL
+3. **BEFORE deploying**, add environment variable: `VITE_API_URL` = your backend URL
+4. Deploy the project
+5. If you added the env variable after deploying, you MUST redeploy with build cache disabled
 
 **Backend:** Follow Render or Railway instructions above for backend + database.
+
+**Note:** Vite environment variables are loaded at **build time**, not runtime. If you set `VITE_API_URL` after deployment, you must trigger a new build. See [DEPLOYMENT.md](./DEPLOYMENT.md) for details.
 
 ### Environment Variables for Production
 
@@ -184,6 +195,9 @@ Make sure to set these environment variables in your hosting platform:
 
 **Frontend:**
 - `VITE_API_URL` - Your backend API URL (e.g., https://sjmc-backend.onrender.com)
+  - **Must be set BEFORE first deployment**
+  - **No trailing slash**
+  - **Must use https:// for production**
 
 ---
 

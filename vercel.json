@@ -9,5 +9,12 @@
       "source": "/(.*)",
       "destination": "/index.html"
     }
-  ]
+  ],
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "env": {
+    "VITE_API_URL": {
+      "description": "Backend API URL (e.g., https://your-backend.onrender.com). IMPORTANT: Must be set BEFORE first deployment. See DEPLOYMENT.md for details.",
+      "required": true
+    }
+  }
 }
