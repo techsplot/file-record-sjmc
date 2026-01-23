@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { PersonalFile, FamilyFile, ReferralFile, EmergencyFile, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile } from '../types.js';
+import { PersonalFile, FamilyFile, ReferralFile, EmergencyFile, NewPersonalFile, NewFamilyFile, NewReferralFile, NewEmergencyFile, Gender } from '../types.js';
 // FIX: Changed date-fns import to use a named import for `addYears` to resolve "not callable" error.
 import { addYears } from 'date-fns';
 
@@ -130,7 +130,7 @@ const mapPersonalFile = (row: PersonalFileRow): PersonalFile => ({
     id: row.id,
     name: row.name,
     age: row.age,
-    gender: row.gender,
+    gender: row.gender as Gender,
     registrationDate: row.registrationdate,
     expiryDate: row.expirydate
 });
@@ -155,7 +155,7 @@ const mapEmergencyFile = (row: EmergencyFileRow): EmergencyFile => ({
     id: row.id,
     name: row.name,
     age: row.age,
-    gender: row.gender,
+    gender: row.gender as Gender,
     registrationDate: row.registrationdate,
     expiryDate: row.expirydate
 });
