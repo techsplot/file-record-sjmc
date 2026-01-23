@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { EmergencyFile, FileStatus, TableColumn, NewEmergencyFile } from '../../types';
 import FileTable from '../FileTable';
-import PersonalFileModal from '../modals/PersonalFileModal';
+import EmergencyFileModal from '../modals/EmergencyFileModal';
 import { SearchIcon, PlusIcon } from '../icons';
 import { format, isBefore } from 'date-fns';
 import { parseISO } from 'date-fns';
@@ -178,7 +178,7 @@ const EmergencyFilesView: React.FC = () => {
       {!isLoading && !error && (
         <FileTable data={filteredFiles} columns={columns} onView={handleView} onEdit={handleEdit} onDelete={handleDelete} />
       )}
-      <PersonalFileModal 
+      <EmergencyFileModal 
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
